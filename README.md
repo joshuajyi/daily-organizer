@@ -181,12 +181,12 @@ engineering notes, and the screenshots.
 
 ## Development note
 
-I built this with Claude as a coding assistant, and it wrote most of the code.
-My part was the product: deciding what the app is for, setting the rules
-above, going through two earlier designs before this one, and using each
-build on my Mac to find what was confusing or broken. The three problems described
-above all came from that testing. I am now working through the code myself so
-that I can extend it without help.
+I built this with Claude as a coding assistant. My part was the product: 
+deciding what the app is for, setting the rules above, going through two 
+earlier designs before this one, and using each build on my Mac to find what 
+was confusing or broken. The three problems described above all came from 
+that testing. I am now working through the code myself so that I can extend 
+it without help.
 
 ## References
 
