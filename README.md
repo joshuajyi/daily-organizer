@@ -29,6 +29,22 @@ The app can:
 
 There are no accounts and no network requests. All data stays on the Mac.
 
+## Download
+
+The app is on the [Releases page](https://github.com/joshuajyi/daily-organizer/releases/latest)
+as a disk image, for macOS 13 or later.
+
+1. Open the disk image and drag Daily Organizer onto Applications.
+2. Open it. macOS will say it could not verify the app. That is because the
+   download is not notarized by Apple, which needs a paid developer account.
+   Click Done, then open System Settings, go to Privacy & Security, scroll
+   down and click **Open Anyway**. This is only needed the first time.
+3. Enter your access code. Message me if you would like one.
+
+The code is asked for once. It is checked on your Mac, against a list built
+into the app, and nothing is sent anywhere to do it. There is no account and no
+sign-in, and everything you add stays on your computer.
+
 ## Screenshots
 
 ![Today in the Nightfall theme](docs/images/today-nightfall.png)
@@ -126,6 +142,7 @@ time handling, the parser, repeats, storage and testing in more detail.
 | What | Count | Covers |
 |---|---:|---|
 | Date and repeat rules | 20 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist; rejecting bad imports |
+| Access codes | 4 tests | The built-in SHA-256 against Node's at every block boundary; reading a code however it is typed; accepting only issued codes |
 | Typed-line parser | 18 tests | Dates, times, lists and repeats in different word orders; words that must not be read as dates |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |
@@ -165,8 +182,10 @@ The install script now asks the running copy to quit before replacing it.
 
 ## Limitations
 
-- It runs on macOS only and is a personal build. It is not notarized, so it is
-  not ready to hand to other people yet.
+- It runs on macOS only. The download is not notarized, so macOS asks for an
+  extra approval the first time it is opened.
+- The access code is a gate, not a lock. A code can be passed on, and it does
+  not protect the data on the Mac.
 - There is no sync, no phone version and no calendar import.
 - An alert at an exact time needs the Mac to be on and awake, and Focus modes
   can silence it.

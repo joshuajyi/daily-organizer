@@ -242,9 +242,38 @@ case.
 The app keeps at most 60 alerts pending at a time. If more are needed it shows
 an error instead of claiming they are all scheduled.
 
+## Access codes
+
+A copy that is handed out asks for a code the first time it opens. I wanted
+that without breaking the promise that the app never uses the network, so the
+check had to work with no server.
+
+When I make codes, a script writes the codes themselves to a file that stays
+on my Mac, and writes only their SHA-256 fingerprints into the app. A typed
+code is hashed and looked up in that list. A fingerprint cannot be turned back
+into a code, so having the app is not enough to make one. Each code is sixteen
+characters from a 32-letter alphabet, which is 80 bits, far too many to guess.
+
+The hash function is written out in the app, about sixty lines, instead of
+calling the system's. That way the same code runs in the Mac app, in the
+browser preview and in the tests, with no dependence on which web view
+features are available. The tests compare it with Node's implementation for
+every message length from 0 to 200 bytes, because the mistakes in a
+hand-written SHA-256 are almost always in the padding at 55, 56, 63 and 64
+bytes.
+
+The alphabet leaves out I, L, O and U, and a typed O or I is read as 0 or 1,
+so a code read aloud or copied by hand still works.
+
+What it does not do: it cannot tell who is typing a code, so a code can be
+shared, and I cannot cancel one without a new build. Someone determined could
+also alter the app to skip the check. Fixing either would need a server, and
+for an app whose point is that it stays on your Mac, I decided that was the
+wrong trade.
+
 ## Testing approach
 
-The rules layer has 41 unit tests. They run in about a tenth of a second
+The rules layer has 45 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.

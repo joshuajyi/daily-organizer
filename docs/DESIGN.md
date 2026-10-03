@@ -23,7 +23,10 @@ separated by space or by one hairline.
 **The Mac's own font, in four sizes.** 13px for labels, times and buttons.
 15px for anything read or typed. 22px for a side heading. 34px for the page
 title. Weight and colour do the rest. An earlier version used twelve sizes and
-felt uneven without it being obvious why.
+felt uneven without it being obvious why. The right column goes one step
+further and uses a single size: a label, a day or a time is told apart from
+what it describes by its colour, so every line of a list sits on the same
+measure.
 
 **One accent.** Indigo marks the present moment, the selection and keyboard
 focus. Red appears only for something overdue. Everything else is ink and grey.
@@ -93,9 +96,21 @@ named after where the task goes.
 Rows / Columns / Month switch feel like it sometimes navigated away. Now it is
 a third layout of the same tab.
 
-**No loading screen.** The app is ready in well under a second, so a splash
-screen would only add waiting. Instead the line draws itself down the page as
-the app opens. It takes about half a second and delays nothing.
+**An intro, but only on a real start.** I first decided against any opening
+screen, because the app is ready in well under a second. I changed my mind
+after noticing how rarely it actually starts: closing the window only hides
+it. So starting it from nothing now shows two lines, "Your life." and then
+"Organized.", each coming into focus on the bare page. They leave before the
+day comes through, so words are never read over other words, and the page is
+only put together at that moment so its own arrival is seen. Bringing the
+window back shows the day at once, a click or a key press skips the intro,
+and it does not play when macOS is set to reduce motion.
+
+**Asking for a code without asking for trust.** The first screen a new person
+sees asks for an access code. It holds a heading, the code, and one sentence:
+"Only to confirm your copy, and only this once. Checked on this Mac. Nothing
+is sent." That is the question anyone has when an app asks for something on
+first launch. There is no button. A complete code is checked as it lands.
 
 **Closing the window hides the app.** The Dock count, the reminders and the
 global shortcut only work while the app is running, so the red button hides the
