@@ -57,8 +57,8 @@ text to stand out.
 | Place | What it holds |
 |---|---|
 | Left column | Today, Upcoming, Anytime, then lists |
-| Centre | The Every day row, the day's line, then "Needs a day" |
-| Right column | The week ahead and a note for the day, or the details of the selected item |
+| Centre | The day's line, then "Needs a day" |
+| Right column | The daily checklist, the week ahead and a note for the day, or the details of the selected item |
 | Upcoming | The same dates as Rows, as seven Columns, or as a Month |
 | Any day | The same line as Today, for any date. Clicking the date goes straight to any day; arrows beside it step a day. |
 | Bottom | Save state, how much of today is done, and the next fixed thing |

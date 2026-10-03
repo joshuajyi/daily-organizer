@@ -21,7 +21,8 @@ The app can:
 - Show what is coming as rows, as seven day columns, or as a month
 - Open any date as the same line that today is, to plan it or to look back
 - Move a task or an event to another day by dragging it there
-- Keep things I do every day in their own row, out of the day's count
+- Keep a daily checklist (slept 8 hours, checked email) that clears each
+  morning and stays out of the day's count
 - Hold a missed task until I decide where it goes, without moving its deadline
 - Schedule reminders with macOS so they still arrive after the app is quit
 - Store everything in a local SQLite database, with daily backups
@@ -32,9 +33,9 @@ There are no accounts and no network requests. All data stays on the Mac.
 
 ![Today in the Nightfall theme](docs/images/today-nightfall.png)
 
-Today in Nightfall. A square is a task and a diamond is an event. The "Every
-day" row above the line holds routines. "Needs a day" under the line holds
-anything still open that is not planned for today.
+Today in Nightfall. A square is a task and a diamond is an event. The daily
+checklist at the top right holds what I ask myself every day. "Needs a day"
+under the line holds anything still open that is not planned for today.
 
 ![Today in the Daylight theme](docs/images/today-daylight.png)
 
@@ -67,7 +68,7 @@ Return.
 | `robotics club every wednesday 5pm` | An event that repeats every Wednesday |
 | `club meeting every fourth wednesday` | A task on the fourth Wednesday of each month |
 | `laundry every other sunday` | A task every two weeks on Sunday |
-| `vitamins every day` | A routine in the Every day row |
+| `vitamins every day` | An item on the daily checklist |
 | `lab report due sunday 11:59pm school` | A task with a deadline, filed in my School list |
 | `SAT prep` | A task called "SAT prep" (not Saturday) |
 
@@ -87,8 +88,8 @@ Most of the work was deciding what the app should refuse to do.
    onto the line. It waits in "Needs a day" with one question, "Move to", and
    three equal answers: Today, Tomorrow, or Anytime.
 3. **Repeats do not create a backlog.** Finishing one sets up the next. A
-   repeating event I never ticked off moves to its next date by itself. A
-   daily routine simply comes back each morning.
+   repeating event I never ticked off moves to its next date by itself. The
+   daily checklist simply clears each morning.
 4. **Only two marks.** A square is a task and a diamond is an event, everywhere
    in the app. A dashed mark is a later occurrence of something that repeats.
 5. **Dates are words.** In the details, a date reads "Sunday, 11:59 PM" and is
@@ -124,7 +125,7 @@ time handling, the parser, repeats, storage and testing in more detail.
 
 | What | Count | Covers |
 |---|---:|---|
-| Date and repeat rules | 19 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; rejecting bad imports |
+| Date and repeat rules | 20 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist; rejecting bad imports |
 | Typed-line parser | 18 tests | Dates, times, lists and repeats in different word orders; words that must not be read as dates |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |

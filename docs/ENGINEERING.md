@@ -163,12 +163,29 @@ future date at once.
 | Kind | If I do nothing |
 |---|---|
 | Repeating event (a class) | Moves to its next date by itself |
-| Daily routine (vitamins) | Comes back the next morning |
+| Daily checklist item (vitamins) | Comes back the next morning |
 | Repeating task (vacuum weekly) | Waits under "Needs a day", where I can do it or skip it |
 
 The reasoning is that nobody ticks off every class they attended, and nobody
 wants yesterday's vitamins twice, but a chore that was skipped usually still
 needs doing.
+
+## The daily checklist
+
+A checklist item is not a new kind of thing. It is a task that repeats every
+day, and the interface lists such tasks beside the line instead of on it. That
+reuse meant the checklist needed only two additions to the repeat rules.
+
+**Unticking.** Finishing a repeating task normally cannot be undone, because
+the next occurrence already exists and reopening would leave two. A checklist
+gets ticked by mistake often enough that this was not acceptable. Unticking
+finds tomorrow's copy and removes it, so there is exactly one item again.
+Renaming or deleting a ticked item reaches that copy too. Otherwise the old
+name, or the deleted item, would be back the next morning.
+
+**Order.** Each day's copy keeps the moment the item was first added. The
+list is sorted by that, so it stays in the order it was written no matter
+which items were ticked or when.
 
 ## One line for every day
 
@@ -227,7 +244,7 @@ an error instead of claiming they are all scheduled.
 
 ## Testing approach
 
-The rules layer has 40 unit tests. They run in about a tenth of a second
+The rules layer has 41 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.
