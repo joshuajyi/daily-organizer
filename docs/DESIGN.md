@@ -60,7 +60,7 @@ text to stand out.
 | Centre | The Every day row, the day's line, then "Needs a day" |
 | Right column | The week ahead and a note for the day, or the details of the selected item |
 | Upcoming | The same dates as Rows, as seven Columns, or as a Month |
-| Any day | The same line as Today, for any date. Arrows beside the date step a day. |
+| Any day | The same line as Today, for any date. Clicking the date goes straight to any day; arrows beside it step a day. |
 | Bottom | Save state, how much of today is done, and the next fixed thing |
 | Cmd+K | Find anything, go anywhere, run any command |
 
