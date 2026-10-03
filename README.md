@@ -19,6 +19,8 @@ The app can:
 - Repeat tasks and events, including "every other Friday" and "the fourth
   Wednesday of each month"
 - Show what is coming as rows, as seven day columns, or as a month
+- Open any date as the same line that today is, to plan it or to look back
+- Move a task or an event to another day by dragging it there
 - Keep things I do every day in their own row, out of the day's count
 - Hold a missed task until I decide where it goes, without moving its deadline
 - Schedule reminders with macOS so they still arrive after the app is quit
@@ -122,7 +124,7 @@ time handling, the parser, repeats, storage and testing in more detail.
 
 | What | Count | Covers |
 |---|---:|---|
-| Date and repeat rules | 18 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; rejecting bad imports |
+| Date and repeat rules | 19 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; rejecting bad imports |
 | Typed-line parser | 18 tests | Dates, times, lists and repeats in different word orders; words that must not be read as dates |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |

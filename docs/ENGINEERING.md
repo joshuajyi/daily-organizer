@@ -170,6 +170,47 @@ The reasoning is that nobody ticks off every class they attended, and nobody
 wants yesterday's vitamins twice, but a chore that was skipped usually still
 needs doing.
 
+## One line for every day
+
+Today was originally its own screen. It is now one case of a more general one:
+a page that draws any date as a line. The three cases differ only in how the
+line is drawn.
+
+| Day | The line | Can add |
+|---|---|---|
+| Today | Solid above the Now mark, faint below | Yes |
+| Ahead | Faint all the way, ending in the add field | Yes |
+| Behind | Solid all the way, ending at the last thing | No, it is a record |
+
+A past day shows what was finished that day and what was planned but not done.
+Nothing is stored per day to make this work. The page is computed from the
+same items, filtered by date, which is why a day page is always consistent
+with Today, Upcoming and the month.
+
+## Dragging to another day
+
+In the Columns layout a task or an event can be dragged to another day. This
+uses pointer events directly instead of the browser's drag-and-drop API. The
+drag-and-drop API behaves differently between browsers and inside a desktop
+web view, and it cannot be driven reliably by an automated test. With pointer
+events the same code runs in the Mac app and in the test browser.
+
+The details that make it feel right:
+
+- A press only becomes a drag after the pointer has moved five pixels, so a
+  click still opens the item.
+- The row captures the pointer, so the drag keeps working when the pointer
+  leaves the row or moves quickly.
+- The click that follows a drag is swallowed. Otherwise dropping an item would
+  also open it.
+- Escape cancels and puts the item back.
+
+What a drop means depends on what was dragged. An event keeps its time of day
+and takes its reminder with it. A task keeps its deadline, because moving a
+plan must never move a deadline. A deadline shown in a column cannot be
+dragged at all, and neither can a later occurrence of something that repeats,
+since it does not exist yet.
+
 ## Reminders
 
 Reminders are handed to macOS rather than run by a timer in the app. After
@@ -186,7 +227,7 @@ an error instead of claiming they are all scheduled.
 
 ## Testing approach
 
-The rules layer has 39 unit tests. They run in about a tenth of a second
+The rules layer has 40 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.
@@ -211,8 +252,6 @@ written checklist that is followed by hand on the Mac.
 
 ## What I would do next
 
-- Drag an item to another day in the Columns layout to reschedule it.
-- Show any day as a line, not only today.
 - Support "the last Friday of the month".
 - Import deadlines from a pasted syllabus. This is the one job that plain
   rules cannot do well, and the only place I would consider a language model.
