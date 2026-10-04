@@ -84,6 +84,12 @@ something the app does.
 | Finishing something just hides it | Finished things stay on the day, crossed out, and the line fills in above Now. |
 | The app wants me to work its way | Nothing is required. Type a line and press Return. |
 
+One more came from my own reason for giving up on other apps: adding things
+took effort. A syllabus already lists a term's deadlines, so several lines
+pasted anywhere in the app are read as a list of dates. A syllabus or a
+Canvas calendar file adds a term at once, after showing what was understood
+and what was not.
+
 ## Small decisions that took a while
 
 **"Let it go" became "Anytime".** The choices for a missed task used to be

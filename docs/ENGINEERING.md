@@ -10,7 +10,8 @@ Interface (React, TypeScript)
   screens, rows, the details column, Cmd+K
         |
 Rules (plain TypeScript, no React, no Tauri)
-  dates and time zones, repeats, the typed-line parser, validation
+  dates and time zones, repeats, the typed-line parser, the importer,
+  undo history, validation
         |
 Save queue (TypeScript)
   one save at a time, newest state wins, retry on failure
@@ -242,6 +243,68 @@ case.
 The app keeps at most 60 alerts pending at a time. If more are needed it shows
 an error instead of claiming they are all scheduled.
 
+## Bringing dates in
+
+Pasting a syllabus, or choosing a calendar file, adds a term's deadlines at
+once. Both readers are plain functions that take text and return a list of
+what was found and a list of what was not understood. The dialog only shows
+those two lists.
+
+**Pasted text** is read a line at a time with the same parser as the add
+field, after each line is cleaned up: bullets and numbering removed, brackets
+opened, "Due:" turned into "due", a time zone abbreviation dropped. Then the
+import adds three rules of its own, because a schedule is not a line typed
+now.
+
+- A date with no year means the nearest one. Typed today, "Sep 15" means next
+  September. In a syllabus pasted in October it means three weeks ago.
+- A bare date is a deadline if the line names work ("homework", "report",
+  "due"), and an event if it names somewhere to be ("exam", "quiz"). The words
+  decide, not the position of the date.
+- "Sep 15: Homework 1 due 11:59 PM" has the time after "due" and the date
+  before it. In the add field a lone "due 11:59 PM" means today. In a
+  schedule it belongs to the date on the same line.
+
+**Calendar files** follow the iCalendar format, which I parse directly: long
+lines are unfolded, each property is split into its name, parameters and
+value, and blocks nested inside an event (alarms) are skipped. The parts that
+took care:
+
+- **Three kinds of time.** A date alone is an all-day entry. A time ending in
+  Z is UTC. A time with a named zone is wall-clock time there. Each becomes
+  this Mac's day and time. Converting a wall-clock time in another zone to an
+  instant uses the zone's offset at that moment, computed twice so a time just
+  after a daylight-saving change is right.
+- **Repeats the app can keep, and ones it cannot.** Weekly, monthly and yearly
+  rules map onto the app's own. A class on Monday and Wednesday becomes two
+  weekly events. "The last Friday" is not something the app can represent, so
+  the first date is brought in alone and its note says it repeats in the
+  original. A series that has already ended is left out.
+- **The anchor.** Rent on the 31st, first paid in January, must be measured
+  from January 31 even though the next one is in October. The import keeps
+  the original first date as the anchor and only moves the visible occurrence.
+
+Everything found is checked against what the app already holds, by name and
+day, so the same file can be brought in again every week.
+
+## Undo
+
+The whole workspace is one value that is never changed in place. Every change
+builds a new value that shares whatever did not change. That makes undo
+almost free: a step back is the value from before, and a hundred steps cost
+little more than one.
+
+The work was in deciding what a step is. Details save on every keystroke, so
+a naive history would undo one letter at a time. A change counts as typing
+only if it altered nothing but the words of one thing: its name, its notes or
+its place. More typing in the same thing within a second and a half joins
+the same step. Anything else, such as finishing, moving, deleting or
+importing, is always its own step, however fast it follows the last.
+
+One kind of change is deliberately not recorded: the app moving a repeating
+event on to its next date by itself. If it were, Undo would land on a state
+the app immediately changes again, and Cmd+Z would appear to do nothing.
+
 ## Access codes
 
 A copy that is handed out asks for a code the first time it opens. I wanted
@@ -273,7 +336,7 @@ wrong trade.
 
 ## Testing approach
 
-The rules layer has 45 unit tests. They run in about a tenth of a second
+The rules layer has 59 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.
@@ -299,6 +362,10 @@ written checklist that is followed by hand on the Mac.
 ## What I would do next
 
 - Support "the last Friday of the month".
-- Import deadlines from a pasted syllabus. This is the one job that plain
-  rules cannot do well, and the only place I would consider a language model.
+- Read a syllabus written as paragraphs. The current reader needs a date on
+  the same line as the thing it dates. Prose is the one place plain rules run
+  out, and the only place I would consider a language model.
+- Split the main interface file. The five views still share one component and
+  its state. The pieces that could be separated without that (settings, the
+  guide, the checklist, the import dialog) already are.
 - Sign and notarize the app so other students can install it.

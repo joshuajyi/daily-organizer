@@ -15,6 +15,8 @@ times.
 The app can:
 
 - Read a line typed the way I would say it, such as `essay due friday 5pm`
+- Read a whole pasted syllabus, or a calendar file from Canvas or Google
+  Calendar, and add every deadline and exam at once
 - Keep the day I plan to work on something separate from the day it is due
 - Repeat tasks and events, including "every other Friday" and "the fourth
   Wednesday of each month"
@@ -25,6 +27,7 @@ The app can:
   morning and stays out of the day's count
 - Hold a missed task until I decide where it goes, without moving its deadline
 - Schedule reminders with macOS so they still arrive after the app is quit
+- Take back any change with Cmd+Z, and bring it back with Shift+Cmd+Z
 - Store everything in a local SQLite database, with daily backups
 
 There are no accounts and no network requests. All data stays on the Mac.
@@ -65,6 +68,13 @@ The same day in Daylight.
 
 Cmd+K finds any task or event, jumps to a view, or runs a command.
 
+![A pasted syllabus being read](docs/images/import.png)
+
+A syllabus pasted into the app. Each line that carries a date is shown as what
+it will become before anything is added. Two deadlines that have already
+passed start left out, and three lines of prose are counted as not understood
+instead of being guessed at.
+
 The screenshots use example data, not my own tasks. They were taken from the
 app's browser preview on Linux, where a stand-in font replaces the Mac system
 font, so the installed app looks slightly different.
@@ -93,6 +103,30 @@ is worse than no parser, so short weekday names only count after a word like
 `due`, `on` or `next`, and "weekly" only counts next to a real day or time.
 
 This uses plain rules. There is no AI model and no network call in the app.
+
+## A semester in one paste
+
+The same reader works on many lines at once. Pasting several lines anywhere
+in the app opens them as a list to bring in.
+
+| A line in the syllabus | It becomes |
+|---|---|
+| `Sep 15: Homework 1 due 11:59 PM` | A task due September 15 at 11:59 PM |
+| `Oct 14 — Midterm exam, 3:00pm, ENG 189` | An event on October 14 at 3:00 PM |
+| `Homework 3 (due Oct 27 at 11:59pm PST)` | A task due October 27 at 11:59 PM |
+| `Project proposal due: Friday, Nov 6` | A task due November 6 |
+| `Final exam: December 15, 2026 at 9:45 AM` | An event on December 15 at 9:45 AM |
+| `Week 1 (Aug 24 – Aug 28): Introduction` | Not understood, and listed as such |
+| `Late work loses 10% per day.` | Not understood, and listed as such |
+
+A span of days is set aside on purpose. Which end of "Aug 24 to Aug 28" is the
+deadline would be a guess, and a wrong guess puts something on the wrong day
+without my noticing.
+
+A calendar file (.ics) is read the same way. Canvas exports each assignment
+as an event at the moment it is due, so those become tasks with deadlines. A
+class that meets Monday and Wednesday becomes two weekly events. Bringing the
+same file in a week later adds only what is new.
 
 ## The rules behind the screen
 
@@ -141,12 +175,14 @@ time handling, the parser, repeats, storage and testing in more detail.
 
 | What | Count | Covers |
 |---|---:|---|
-| Date and repeat rules | 20 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist; rejecting bad imports |
+| Bringing dates in | 7 tests | A syllabus read line by line with the exact result checked; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
+| Undo and redo | 6 tests | Exact restore; typing merged into one step; decisions never merged; the step limit |
+| Date and repeat rules | 21 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
 | Access codes | 4 tests | The built-in SHA-256 against Node's at every block boundary; reading a code however it is typed; accepting only issued codes |
 | Typed-line parser | 18 tests | Dates, times, lists and repeats in different word orders; words that must not be read as dates |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |
-| Interface check | 1 scripted run | A real browser is driven through adding, completing, repeats, all three Upcoming layouts, backup and restore, and layout at two window sizes |
+| Interface check | 1 scripted run | A real browser is driven through adding, completing, repeats, all three Upcoming layouts, pasting a syllabus, undo and redo, the keyboard, backup and restore, a deliberate crash and recovery, and layout at two window sizes |
 
 The interface check also guards things that are easy to break without
 noticing. It fails if a type size outside the app's fixed scale appears on
@@ -186,7 +222,11 @@ The install script now asks the running copy to quit before replacing it.
   extra approval the first time it is opened.
 - The access code is a gate, not a lock. A code can be passed on, and it does
   not protect the data on the Mac.
-- There is no sync, no phone version and no calendar import.
+- There is no sync and no phone version. A calendar file can be brought in,
+  but that is a one-time read, not a live connection.
+- The syllabus reader works on lines that carry their own date. A syllabus
+  written as paragraphs, or as a table of week numbers with no dates, is
+  mostly set aside.
 - An alert at an exact time needs the Mac to be on and awake, and Focus modes
   can silence it.
 - The parser understands English and US-style dates.
