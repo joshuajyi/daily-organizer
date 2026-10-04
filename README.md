@@ -1,19 +1,31 @@
-# Daily Organizer
+# Kairo
 
-<img src="docs/images/icon.png" width="96" alt="Daily Organizer icon: one vertical line, white above, indigo in the middle, grey below">
+<img src="docs/images/icon.png" width="96" alt="Kairo icon: one vertical line, white above, indigo in the middle, grey below">
 
-Daily Organizer is a Mac app I made for my own assignments, deadlines, events
+Kairo is a Mac app I made for my own assignments, deadlines, events
 and daily routines. I had given up on other organizers for the same three
 reasons each time: adding things took too much effort, the app never felt like
 mine, and I forgot it existed. I wanted to see whether a different design
 could remove those problems instead of working around them.
 
-The main idea is that **today is one line**. What I have finished sits above a
-mark for the present moment. What is left hangs below it, with events at their
-times.
+Kairo tells me **when to start**, not only when things are due. Each deadline
+carries the hours of work it takes, and Kairo spreads that work over the days
+before it, places each day's share in the gaps between my classes, and warns me
+about a heavy week while there is still time to start early.
+
+The day itself is **one line**. What I have finished sits above a mark for the
+present moment. What is left hangs below it, with events at their times.
 
 The app can:
 
+- Plan backward from a deadline: guess the hours from the kind of work
+  (an essay, a midterm, a lab), spread them over the days before it, and put
+  today's share on the line, with a missed day spread over the days left
+- Suggest a time for each day's work in the free gaps between classes
+- Show the weeks ahead as bars of planned work, with crunch weeks in red
+- Learn from finished work how long each kind really takes
+- Keep courses, with their class times, apart from the rest of life, and show
+  Today as All, School or Life
 - Read a line typed the way I would say it, such as `essay due friday 5pm`
 - Read a whole pasted syllabus, or a calendar file from Canvas or Google
   Calendar, and add every deadline and exam at once
@@ -38,7 +50,7 @@ There are no accounts and no network requests. All data stays on the Mac.
 The app is on the [Releases page](https://github.com/joshuajyi/daily-organizer/releases/latest)
 as a disk image, for macOS 13 or later.
 
-1. Open the disk image and drag Daily Organizer onto Applications.
+1. Open the disk image and drag Kairo onto Applications.
 2. Open it. macOS will say it could not verify the app. That is because the
    download is not notarized by Apple, which needs a paid developer account.
    Click Done, then open System Settings, go to Privacy & Security, scroll
@@ -85,7 +97,8 @@ line gives a span of days, and is counted as not understood instead of being
 guessed at. The course code found at the top
 leads each name and is offered as a new list.
 
-The screenshots use example data, not my own tasks. They were taken from the
+The screenshots use example data, not my own tasks, and were taken before
+the planning-backward features and the new name. They were taken from the
 app's browser preview on Linux, where a stand-in font replaces the Mac system
 font, so the installed app looks slightly different.
 

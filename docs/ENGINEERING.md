@@ -1,6 +1,6 @@
 # Engineering notes
 
-These notes describe how Daily Organizer works underneath. They are written so
+These notes describe how Kairo works underneath. They are written so
 that someone who has not seen the source can follow the decisions.
 
 ## Shape of the app
