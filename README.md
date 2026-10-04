@@ -22,7 +22,8 @@ The app can:
   Wednesday of each month"
 - Show what is coming as rows, as seven day columns, or as a month
 - Open any date as the same line that today is, to plan it or to look back
-- Move a task or an event to another day by dragging it there
+- Let any row be dragged: into the order I want, onto another day, or onto
+  Today, Anytime or a list
 - Keep a daily checklist (slept 8 hours, checked email) that clears each
   morning and stays out of the day's count
 - Hold a missed task until I decide where it goes, without moving its deadline
@@ -67,6 +68,12 @@ The same day in Daylight.
 ![Search and commands](docs/images/search.png)
 
 Cmd+K finds any task or event, jumps to a view, or runs a command.
+
+![A task being dragged to a new place](docs/images/drag.png)
+
+A task held mid-drag. A small copy follows the pointer, its own row is faint
+and already sits where it would land, and the two tasks it passed have moved
+up by one row each. Nothing else on the page moves.
 
 ![A pasted syllabus being read](docs/images/import.png)
 
@@ -185,13 +192,13 @@ time handling, the parser, repeats, storage and testing in more detail.
 |---|---:|---|
 | Bringing dates in | 11 tests | A syllabus read line by line with the exact result checked; a real syllabus copied from a web page, read across its lines; weekly meetings; the term's own dates setting where weekly classes start and stop; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
 | Undo and redo | 6 tests | Exact restore; typing merged into one step; decisions never merged; the step limit |
-| Date and repeat rules | 23 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; a series stopping on its last day; skipping; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
+| Date and repeat rules | 25 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; a series stopping on its last day; skipping; moving one item without disturbing the rest; the checklist keeping a chosen order through ticks; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
 | Access codes | 4 tests | The built-in SHA-256 against Node's at every block boundary; reading a code however it is typed; accepting only issued codes |
 | Typed-line parser | 20 tests | Dates, times, time ranges, lists and repeats in different word orders; words that must not be read as dates |
-| What each page shows | 10 tests | Today's line above and below now; a missed plan told apart from a passed deadline; the order of a day in Upcoming; the week ahead; a day behind and a day ahead |
+| What each page shows | 12 tests | Today's line above and below now; a missed plan told apart from a passed deadline; the order of a day in Upcoming; the week ahead; a day behind and a day ahead |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |
-| Interface check | 1 scripted run | A real browser is driven through adding, completing, repeats, all three Upcoming layouts, pasting a syllabus, undo and redo, the keyboard, backup and restore, a deliberate crash and recovery, and layout at two window sizes |
+| Interface check | 1 scripted run | A real browser is driven through adding, completing, repeats, all three Upcoming layouts, pasting a syllabus, dragging rows into order and onto days and views, undo and redo, the keyboard, backup and restore, a deliberate crash and recovery, and layout at two window sizes |
 
 The interface check also guards things that are easy to break without
 noticing. It fails if a type size outside the app's fixed scale appears on

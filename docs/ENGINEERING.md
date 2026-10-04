@@ -220,29 +220,70 @@ Nothing is stored per day to make this work. The page is computed from the
 same items, filtered by date, which is why a day page is always consistent
 with Today, Upcoming and the month.
 
-## Dragging to another day
+## Dragging
 
-In the Columns layout a task or an event can be dragged to another day. This
-uses pointer events directly instead of the browser's drag-and-drop API. The
-drag-and-drop API behaves differently between browsers and inside a desktop
-web view, and it cannot be driven reliably by an automated test. With pointer
-events the same code runs in the Mac app and in the test browser.
+Any row can be dragged: into a different place among its neighbours, onto
+another day, or onto Today, Anytime or a list in the left column. It began as
+a feature of the Columns layout and was rebuilt as one implementation for the
+whole window.
+
+**Pointer events, not the browser's drag-and-drop.** The drag-and-drop API
+behaves differently between browsers and inside a desktop web view, and an
+automated test cannot drive it reliably. With pointer events the same code
+runs in the Mac app and in the test browser.
+
+**Pages mark things; one place does the dragging.** No page has drag handlers.
+A page only says what things are, with four attributes: this row can be
+picked up, these rows can be arranged together, dropping here moves an item
+to this day, dropping here sends it to this view. A single hook listens on
+the window, finds what was pressed and what is under the pointer by those
+attributes, and calls the same actions the buttons call. Adding dragging to
+a new page is a matter of adding attributes.
+
+**Where the order is kept.** There were two honest ways to store a task's
+place: a rank on each item for each view, or one order for everything. I
+chose one order, the order of the workspace's own list of items, which every
+view already showed. Moving a task is taking it out of the list and putting
+it just before or just after another, and it has then moved in every view at
+once. The daily checklist is the exception. Ticking an item makes a new copy
+for tomorrow, so position in the list would follow the order things were
+ticked in. The checklist has its own small rank that each copy inherits.
+
+**Nothing jumps.** While a row is held, the rows between its old place and
+its new one are offset by exactly one row with a short transition, and its
+own faint row is offset to the place it would take. None of this goes
+through React. On the drop, the new order is drawn synchronously and the
+offsets are removed in the same frame, so the rows are already where the
+offsets had put them and nothing is seen to move twice.
+
+**Scrolling at the edges.** Held within 72 pixels of the top or bottom of a
+list that scrolls, the list scrolls once a frame, by an amount that grows
+with the square of how far into that band the pointer is. That gives fine
+control near the start of the band and speed at the very edge. After each
+step the item under the pointer is looked up again, since it has changed
+without the pointer moving.
 
 The details that make it feel right:
 
 - A press only becomes a drag after the pointer has moved five pixels, so a
   click still opens the item.
 - The row captures the pointer, so the drag keeps working when the pointer
-  leaves the row or moves quickly.
+  leaves the row or the window.
 - The click that follows a drag is swallowed. Otherwise dropping an item would
   also open it.
-- Escape cancels and puts the item back.
+- The copy that follows the pointer hangs below it once it leaves its own
+  list, so it never covers the word or the day it is about to land on.
+- Escape puts the item back. Cmd+Z takes a finished move back. Option with
+  the arrow keys moves a row without the mouse.
 
 What a drop means depends on what was dragged. An event keeps its time of day
 and takes its reminder with it. A task keeps its deadline, because moving a
-plan must never move a deadline. A deadline shown in a column cannot be
+plan must never move a deadline. A deadline shown on its day cannot be
 dragged at all, and neither can a later occurrence of something that repeats,
-since it does not exist yet.
+since it does not exist yet. An event cannot be put among the tasks of a day,
+because its place is its time. And nothing can be dragged onto the daily
+checklist: that would turn a task into something done every day, and a drop
+should move a thing, not change what it is.
 
 ## Reminders
 
@@ -410,7 +451,7 @@ workspace and the time and return lists, so they are tested by calling them.
 
 ## Testing approach
 
-The rules layer has 77 unit tests. They run in about a tenth of a second
+The rules layer has 81 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.
