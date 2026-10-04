@@ -106,8 +106,9 @@ This uses plain rules. There is no AI model and no network call in the app.
 
 ## A semester in one paste
 
-The same reader works on many lines at once. Pasting several lines anywhere
-in the app opens them as a list to bring in.
+The same reader works on many lines at once. "Bring in dates" in the left
+column opens a place to paste them, and pasting several lines anywhere in the
+app opens it too.
 
 | A line in the syllabus | It becomes |
 |---|---|
