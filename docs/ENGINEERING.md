@@ -265,6 +265,31 @@ now.
   before it. In the add field a lone "due 11:59 PM" means today. In a
   schedule it belongs to the date on the same line.
 
+Two shapes need more than one line, and I only learned that from pasting a
+real syllabus.
+
+- **A schedule copied out of a table.** Each cell arrives on its own line: a
+  date alone, then the topic, a paragraph, and perhaps "HW4 – Oct 16". The
+  reader collects consecutive lines that are nothing but a date, and takes
+  the first line after them as what those dates are for. An exam or a day
+  off on two dates becomes two events. A chapter taught over three days is
+  one topic, on the first.
+- **A weekly class.** "Monday, Wednesday, 10:30 AM to 11:45 AM, Art Building
+  133" has no date at all. Days followed by a time range are read as a
+  weekly meeting, one event for each day, named by the short heading above
+  ("Lecture", "Office Hours") and carrying what follows the times as its
+  place. "2-3pm" starts in the afternoon and "11-1pm" in the morning.
+
+A time with no day of its own means today in the add field. In a pasted page
+it is a footer clock, so the import passes it over. And of the lines that
+were not understood, only those that mention a date or a time are listed.
+Listing every line of prose buried the two that mattered under two hundred
+that did not.
+
+A course code near the top of the text is put in front of each name and
+offered as a new list, made in the same change as the items so that one Undo
+removes both.
+
 **Calendar files** follow the iCalendar format, which I parse directly: long
 lines are unfolded, each property is split into its name, parameters and
 value, and blocks nested inside an event (alarms) are skipped. The parts that
@@ -336,7 +361,7 @@ wrong trade.
 
 ## Testing approach
 
-The rules layer has 59 unit tests. They run in about a tenth of a second
+The rules layer has 61 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.

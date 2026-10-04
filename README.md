@@ -72,8 +72,9 @@ Cmd+K finds any task or event, jumps to a view, or runs a command.
 
 A syllabus pasted into the app. Each line that carries a date is shown as what
 it will become before anything is added. Two deadlines that have already
-passed start left out, and three lines of prose are counted as not understood
-instead of being guessed at.
+passed start left out. One line gives a span of days, and is counted as not
+understood instead of being guessed at. The course code found at the top
+leads each name and is offered as a new list.
 
 The screenshots use example data, not my own tasks. They were taken from the
 app's browser preview on Linux, where a stand-in font replaces the Mac system
@@ -117,8 +118,10 @@ app opens it too.
 | `Homework 3 (due Oct 27 at 11:59pm PST)` | A task due October 27 at 11:59 PM |
 | `Project proposal due: Friday, Nov 6` | A task due November 6 |
 | `Final exam: December 15, 2026 at 9:45 AM` | An event on December 15 at 9:45 AM |
+| `Monday, Wednesday, 10:30 AM to 11:45 AM, Art Building 133` under the heading `Lecture` | Two weekly events called Lecture, with the room |
+| `Oct 05` alone on a line, then `First Midterm Exam` on the next | An event on October 5 |
 | `Week 1 (Aug 24 – Aug 28): Introduction` | Not understood, and listed as such |
-| `Late work loses 10% per day.` | Not understood, and listed as such |
+| `Late work loses 10% per day.` | Passed over: it says nothing about when |
 
 A span of days is set aside on purpose. Which end of "Aug 24 to Aug 28" is the
 deadline would be a guess, and a wrong guess puts something on the wrong day
@@ -176,7 +179,7 @@ time handling, the parser, repeats, storage and testing in more detail.
 
 | What | Count | Covers |
 |---|---:|---|
-| Bringing dates in | 7 tests | A syllabus read line by line with the exact result checked; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
+| Bringing dates in | 9 tests | A syllabus read line by line with the exact result checked; a real syllabus copied from a web page, read across its lines; weekly meetings; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
 | Undo and redo | 6 tests | Exact restore; typing merged into one step; decisions never merged; the step limit |
 | Date and repeat rules | 21 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
 | Access codes | 4 tests | The built-in SHA-256 against Node's at every block boundary; reading a code however it is typed; accepting only issued codes |
@@ -212,6 +215,19 @@ space whether or not one is showing. The second cause only appears when macOS
 is set to always show scrollbars, which it does when a mouse is connected, so
 it never showed up in the automated check until I measured for it.
 
+**The first real syllabus broke the reader.** It passed its tests on a
+syllabus I had written to test it, where each line had its own date. Then I
+pasted one of my own. It found 12 things and offered 4, with the first
+midterm and the final missing, my lecture times turned into events with
+broken names, and "200 lines not understood". The schedule had been a table
+on a web page, and copying a table puts every cell on its own line: the date
+alone, then what happens that day on the lines after it. The reader now
+collects dates that stand alone and takes the next line as what they are for.
+It also reads days with a time range as a weekly class, and lists only the
+unread lines that mention a date. The same syllabus now gives 31 things, with
+both midterms, the final, seven homework deadlines and the lecture and office
+hours. It is kept as a test, with the people's contact details replaced.
+
 **An update that did not seem to arrive.** Closing the window hides the app
 so that reminders and the Dock count keep working. That also meant installing
 a new build kept showing the old one, because the old copy was still running.
@@ -225,9 +241,10 @@ The install script now asks the running copy to quit before replacing it.
   not protect the data on the Mac.
 - There is no sync and no phone version. A calendar file can be brought in,
   but that is a one-time read, not a live connection.
-- The syllabus reader works on lines that carry their own date. A syllabus
-  written as paragraphs, or as a table of week numbers with no dates, is
-  mostly set aside.
+- The syllabus reader needs dates to be written out. A schedule given only
+  as week numbers, or deadlines described in a paragraph, is mostly passed
+  over. A weekly class brought in this way has no end date; it has to be
+  removed when the term ends.
 - An alert at an exact time needs the Mac to be on and awake, and Focus modes
   can silence it.
 - The parser understands English and US-style dates.
@@ -247,7 +264,7 @@ engineering notes, and the screenshots.
 I built this with Claude as a coding assistant. My part was the product: 
 deciding what the app is for, setting the rules above, going through two 
 earlier designs before this one, and using each build on my Mac to find what 
-was confusing or broken. The three problems described above all came from 
+was confusing or broken. The problems described above all came from 
 that testing. I am now working through the code myself so that I can extend 
 it without help.
 
