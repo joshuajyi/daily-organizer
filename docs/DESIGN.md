@@ -41,6 +41,12 @@ and rejected, because three shapes need a legend and two do not.
 typing `fri 5pm` or picking from a short list. There are no date pickers and
 no boxed buttons in the details.
 
+**A field that cannot apply is not shown.** An event with a time has an
+Ends line; an all-day event does not. Something that repeats has an Until
+line; something that happens once does not. The first version put the whole
+stretch in one field, "Wednesday, 6:00 PM – 8:45 PM", and at the column's
+usual width the end was cut off. Two short values always fit.
+
 **Placeholders look like placeholders.** Prompt text is much fainter than real
 text. In an early build the two were close enough that an empty field looked
 filled in.

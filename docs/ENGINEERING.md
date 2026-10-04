@@ -7,7 +7,10 @@ that someone who has not seen the source can follow the decisions.
 
 ```text
 Interface (React, TypeScript)
-  screens, rows, the details column, Cmd+K
+  one file per page, rows, the details column, Cmd+K
+        |
+App state (React hooks)
+  where you are, every action with its Undo, the keyboard
         |
 Rules (plain TypeScript, no React, no Tauri)
   dates and time zones, repeats, the typed-line parser, the importer,
@@ -109,11 +112,13 @@ day, a deadline, a repeat and a list.
 It works in passes over the sentence:
 
 1. Find a list name at the end, or a `#tag` anywhere.
-2. Find a repeat phrase that starts with `every`.
-3. Find every date and time. Each one is either attached to the word before it
+2. Find a repeat phrase that starts with `every`, and a last day after
+   `until` if one follows it.
+3. Find a stretch of time, `6-8:45pm` or `2 to 3:30pm`, and keep its end.
+4. Find every date and time. Each one is either attached to the word before it
    (`due`, `by`, `on`) or stands alone.
-4. Whatever was matched is cut out. What remains is the title.
-5. Decide the kind. A time with no `due` makes an event. Otherwise it is a
+5. Whatever was matched is cut out. What remains is the title.
+6. Decide the kind. A time with no `due` makes an event. Otherwise it is a
    task.
 
 The hard part is not recognizing dates. It is **not** recognizing things that
@@ -140,6 +145,8 @@ A few decisions were about how people actually talk:
 - `due midnight` means the end of that day, not its first minute.
 - A weekday said with a date (`friday oct 16`) is one date, and the date wins
   if they disagree.
+- In `6-8:45pm` the "pm" belongs to both ends. In `11-1pm` it cannot, because
+  that would end before it starts, so the start is taken as the morning.
 
 ## Repeats
 
@@ -158,6 +165,14 @@ computes the rest when a screen needs them. Later occurrences are drawn with a
 dashed mark, and nothing is saved for them. This avoids generating hundreds of
 rows for "every day, forever", and it means changing the pattern changes every
 future date at once.
+
+**A last day.** A repeat can be given the last day it may fall on. Because
+only one occurrence is stored, ending a series is a comparison made in the
+four places that compute a next date: showing later occurrences, finishing
+one, skipping one, and the app moving a passed event forward. Each asks the
+same one-line question, "is the next date past the last day?", and stops if
+so. A repeating event that has run out is marked done by itself, so it leaves
+the day without anything being deleted.
 
 **What happens when one is missed** depends on what it is:
 
@@ -280,6 +295,15 @@ real syllabus.
   ("Lecture", "Office Hours") and carrying what follows the times as its
   place. "2-3pm" starts in the afternoon and "11-1pm" in the morning.
 
+- **The term's own dates.** A syllabus usually says once, near the top, when
+  the term runs: "08/19/2026 to 12/07/2026". That line is not a thing to add,
+  but it answers two questions nothing else on the page does. Weekly classes
+  start no earlier than the first day and repeat until the last. And a date
+  written without a year is placed inside the term, so "May 18" in a spring
+  syllabus read the October before is next May, where the nearest-date rule
+  alone would have called it five months ago. A span of a few days with
+  years on it is a break, not a term, and is left alone.
+
 A time with no day of its own means today in the add field. In a pasted page
 it is a footer clock, so the import passes it over. And of the lines that
 were not understood, only those that mention a date or a time are listed.
@@ -359,9 +383,34 @@ also alter the app to skip the check. Fixing either would need a server, and
 for an app whose point is that it stays on your Mac, I decided that was the
 wrong trade.
 
+## How the interface is organized
+
+The interface began as one component and grew to 3,063 lines: every page,
+every action and about forty pieces of state. It is now three folders with
+one rule each.
+
+| Folder | Rule | Holds |
+|---|---|---|
+| `app/` | Knows things, draws nothing | Where you are, every action with its Undo, the keyboard, the macOS hooks, and plain functions that work out what each page shows |
+| `views/` | One file per page | Today, a day, Upcoming as rows, columns and month, a list, Reminders, Trash, the two side columns |
+| `components/` | Knows nothing about the app | A row, the add field, the details, the month grid, Cmd+K. Everything arrives as arguments |
+
+One hook builds a single object holding the workspace, the clock, the
+navigation state and the actions, and hands it to every page through React
+context. A page asks for what it needs by name. This is not finer-grained
+than before, since any change still redraws the page, but the workspace is a
+few hundred items and that was never the cost. The cost was that nobody
+could find anything.
+
+Two details kept behaviour the same. The right column is one element whose
+contents change, as it was, so its width and scroll survive moving between
+pages. And the functions that decide what a page holds (what is above and
+below "now", the order of a day in Upcoming, the week ahead) take the
+workspace and the time and return lists, so they are tested by calling them.
+
 ## Testing approach
 
-The rules layer has 61 unit tests. They run in about a tenth of a second
+The rules layer has 77 unit tests. They run in about a tenth of a second
 because they call functions directly. Tests that involve dates set a fixed
 time zone and a fixed "today", so they give the same result on any machine on
 any day.
@@ -390,7 +439,8 @@ written checklist that is followed by hand on the Mac.
 - Read a syllabus written as paragraphs. The current reader needs a date on
   the same line as the thing it dates. Prose is the one place plain rules run
   out, and the only place I would consider a language model.
-- Split the main interface file. The five views still share one component and
-  its state. The pieces that could be separated without that (settings, the
-  guide, the checklist, the import dialog) already are.
+- Run the scripted browser check automatically on every change. The unit
+  tests, the type check and the build are quick to run anywhere; the browser
+  check measures layout, which depends on the fonts of the machine it runs
+  on, so it is still run by hand.
 - Sign and notarize the app so other students can install it.

@@ -72,8 +72,10 @@ Cmd+K finds any task or event, jumps to a view, or runs a command.
 
 A syllabus pasted into the app. Each line that carries a date is shown as what
 it will become before anything is added. Two deadlines that have already
-passed start left out. One line gives a span of days, and is counted as not
-understood instead of being guessed at. The course code found at the top
+passed start left out. The lecture's days and hours became two weekly events,
+and they stop on the last day of the term, which the first line gives. One
+line gives a span of days, and is counted as not understood instead of being
+guessed at. The course code found at the top
 leads each name and is offered as a new list.
 
 The screenshots use example data, not my own tasks. They were taken from the
@@ -93,6 +95,7 @@ Return.
 | `essay tomorrow due friday` | A task planned for tomorrow, due Friday |
 | `call dentist tomorrow 3pm` | An event tomorrow at 3:00 PM |
 | `robotics club every wednesday 5pm` | An event that repeats every Wednesday |
+| `cmpe 70 6-8:45pm every wednesday until dec 9` | An event from 6:00 to 8:45 PM every Wednesday, ending December 9 |
 | `club meeting every fourth wednesday` | A task on the fourth Wednesday of each month |
 | `laundry every other sunday` | A task every two weeks on Sunday |
 | `vitamins every day` | An item on the daily checklist |
@@ -120,6 +123,7 @@ app opens it too.
 | `Final exam: December 15, 2026 at 9:45 AM` | An event on December 15 at 9:45 AM |
 | `Monday, Wednesday, 10:30 AM to 11:45 AM, Art Building 133` under the heading `Lecture` | Two weekly events called Lecture, with the room |
 | `Oct 05` alone on a line, then `First Midterm Exam` on the next | An event on October 5 |
+| `Fall 2026 … 08/19/2026 to 12/07/2026` near the top | Not added. It is when the weekly classes stop, and which year the other dates belong to |
 | `Week 1 (Aug 24 – Aug 28): Introduction` | Not understood, and listed as such |
 | `Late work loses 10% per day.` | Passed over: it says nothing about when |
 
@@ -179,11 +183,12 @@ time handling, the parser, repeats, storage and testing in more detail.
 
 | What | Count | Covers |
 |---|---:|---|
-| Bringing dates in | 9 tests | A syllabus read line by line with the exact result checked; a real syllabus copied from a web page, read across its lines; weekly meetings; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
+| Bringing dates in | 11 tests | A syllabus read line by line with the exact result checked; a real syllabus copied from a web page, read across its lines; weekly meetings; the term's own dates setting where weekly classes start and stop; a calendar file with all-day, UTC and other-zone times, repeats and an ended series; a second import adding only what is new; damaged files |
 | Undo and redo | 6 tests | Exact restore; typing merged into one step; decisions never merged; the step limit |
-| Date and repeat rules | 21 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; skipping; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
+| Date and repeat rules | 23 tests | Planned, due and reminder staying independent; daylight-saving gaps and repeats; month-end and leap-day repeats; intervals and "Nth weekday"; a series stopping on its last day; skipping; moving to another day; ticking and unticking the daily checklist and its week of history; rejecting bad imports |
 | Access codes | 4 tests | The built-in SHA-256 against Node's at every block boundary; reading a code however it is typed; accepting only issued codes |
-| Typed-line parser | 18 tests | Dates, times, lists and repeats in different word orders; words that must not be read as dates |
+| Typed-line parser | 20 tests | Dates, times, time ranges, lists and repeats in different word orders; words that must not be read as dates |
+| What each page shows | 10 tests | Today's line above and below now; a missed plan told apart from a passed deadline; the order of a day in Upcoming; the week ahead; a day behind and a day ahead |
 | Summaries and day files | 3 tests | The morning summary sentence and the Markdown page for a day |
 | SQLite store (Rust) | 4 tests | Reopening, refusing a stale save, keeping the old state when a save is rejected, backup rotation |
 | Interface check | 1 scripted run | A real browser is driven through adding, completing, repeats, all three Upcoming layouts, pasting a syllabus, undo and redo, the keyboard, backup and restore, a deliberate crash and recovery, and layout at two window sizes |
@@ -228,6 +233,24 @@ unread lines that mention a date. The same syllabus now gives 31 things, with
 both midterms, the final, seven homework deadlines and the lecture and office
 hours. It is kept as a test, with the people's contact details replaced.
 
+**One file of 3,063 lines.** Every page, every action and forty pieces of
+state lived in one component, because each feature was quickest to add there.
+I split it into three folders: what the app knows and can do, one file per
+page, and the small pieces that take everything as arguments. The main file
+is now 277 lines. What made that safe was the scripted browser check: about
+1,600 lines of real clicks and keys, which passed on both sides of the split
+without one step being edited. The part I did not expect was what the split
+exposed. The working-out of what belongs on each page had been trapped inside
+the component where nothing could call it. Moved out as plain functions, it
+got ten tests of its own.
+
+**Arrow keys that worked in the check and not in the app.** Up and down were
+meant to move between rows. On my Mac they did nothing. The check had clicked
+a row first, and the keys only worked once a row already had the focus. And
+when they did move, the Mac's WebKit draws no focus ring on something focused
+by script, so there was nothing to see. The keys now work from anywhere on
+the page, and the app draws the row's cursor itself.
+
 **An update that did not seem to arrive.** Closing the window hides the app
 so that reminders and the Dock count keep working. That also meant installing
 a new build kept showing the old one, because the old copy was still running.
@@ -243,8 +266,9 @@ The install script now asks the running copy to quit before replacing it.
   but that is a one-time read, not a live connection.
 - The syllabus reader needs dates to be written out. A schedule given only
   as week numbers, or deadlines described in a paragraph, is mostly passed
-  over. A weekly class brought in this way has no end date; it has to be
-  removed when the term ends.
+  over. A weekly class stops with the term only when the syllabus gives the
+  term's dates with their years; otherwise it repeats until it is given a
+  last day.
 - An alert at an exact time needs the Mac to be on and awake, and Focus modes
   can silence it.
 - The parser understands English and US-style dates.
