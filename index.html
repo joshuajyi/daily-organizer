@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="Kairo">
+<meta property="og:description" content="A Mac planner that works backward from your deadlines and tells you when to start.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2715%27 fill=%27%23111113%27/%3E%3Crect x=%2729%27 y=%279%27 width=%276%27 height=%2718%27 fill=%27%23f2f2f2%27/%3E%3Crect x=%2729%27 y=%2727%27 width=%276%27 height=%2710%27 fill=%27%238b8bff%27/%3E%3Crect x=%2729%27 y=%2737%27 width=%276%27 height=%2718%27 fill=%27%234a4a4e%27/%3E%3C/svg%3E">
+<title>Kairo</title>
+<meta name="description" content="Kairo is a Mac planner that works backward from your deadlines and tells you when to start.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+/* Layout: Nightfall only (deliberate single dark theme). The app icon's one line runs down the
+   left of the page; a glowing "Now" mark rides it as you scroll. Short page, one live demo. */
+:root{
+  color-scheme:dark;
+  --bg:#000; --ink:#f4f4f5; --dim:#8a8a92; --ghost:#3a3a40; --hair:#18181b; --panel:#0a0a0c;
+  --now:#8b8bff; --now-glow:rgba(139,139,255,.55); --now-haze:rgba(110,110,255,.16); --crunch:#ff6b5b;
+  --sans:"Geist",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:20px;overflow-x:hidden}
+a{color:inherit}
+::selection{background:var(--now);color:#000}
+:focus-visible{outline:2px solid var(--now);outline-offset:3px;border-radius:6px}
+.wrap{max-width:980px;margin-inline:auto;position:relative}
+.mono{font:12px/1.5 var(--mono);letter-spacing:.04em}
+em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+
+/* the line */
+.spine{position:fixed;top:0;bottom:0;left:max(28px,calc(50vw - 490px - 40px));width:2px;z-index:1;pointer-events:none}
+.spine .past,.spine .future{position:absolute;left:0;width:2px}
+.spine .past{top:0;background:linear-gradient(var(--ink),rgba(244,244,245,.55))}
+.spine .future{bottom:0;background:var(--ghost)}
+.spine .mark{position:absolute;left:-5px;width:12px;height:56px;border-radius:2px;background:var(--now);box-shadow:0 0 22px 4px var(--now-glow),0 0 90px 30px var(--now-haze)}
+.spine .lbl{position:absolute;left:18px;top:18px;color:var(--now);font:500 11px var(--mono);letter-spacing:.08em;white-space:nowrap}
+@media (max-width:760px){.spine{display:none}}
+
+/* aura */
+.aura{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.aura i{position:absolute;width:70vmax;height:70vmax;left:0;top:0;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(120,120,255,.20),rgba(120,120,255,.06) 55%,transparent);filter:blur(20px);will-change:transform}
+.grain{position:fixed;inset:-50%;z-index:2;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+main,nav,footer{position:relative;z-index:3}
+
+nav .wrap{display:flex;align-items:center;height:72px;gap:16px}
+.brand{display:flex;gap:10px;align-items:center;text-decoration:none;font-weight:600;letter-spacing:-.01em}
+.navr{margin-left:auto;display:flex;gap:22px;align-items:center}
+.navr a.t{color:var(--dim);text-decoration:none;font-size:14px}
+.navr a.t:hover{color:var(--ink)}
+@media (max-width:520px){.navr a.t{display:none}}
+
+.btn{position:relative;display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 20px;border-radius:999px;font:500 15px var(--sans);text-decoration:none;cursor:pointer;border:1px solid var(--ghost);color:var(--ink);background:transparent;will-change:transform}
+.btn.sm{height:36px;padding:0 15px;font-size:14px}
+.btn.solid{background:var(--ink);color:#000;border-color:var(--ink);box-shadow:0 0 0 0 var(--now-haze);transition:box-shadow .3s}
+.btn.solid:hover{box-shadow:0 0 40px 6px var(--now-haze),0 0 0 1px var(--now)}
+.btn.ghost:hover{border-color:var(--dim)}
+
+/* hero */
+.hero{padding-block:clamp(56px,12vh,120px) 40px}
+.kicker{color:var(--dim);display:flex;gap:10px;align-items:center}
+.kicker b{width:7px;height:7px;border-radius:50%;background:var(--now);box-shadow:0 0 10px var(--now-glow)}
+h1{margin:26px 0 0;font-weight:500;font-size:clamp(52px,11vw,132px);line-height:.92;letter-spacing:-.055em;text-wrap:balance}
+h1 em{font-size:1.08em;letter-spacing:-.02em;color:var(--now);text-shadow:0 0 40px var(--now-haze)}
+.sub{margin-top:28px;font-size:clamp(17px,2vw,20px);color:var(--dim);max-width:34ch;line-height:1.5}
+.sub b{color:var(--ink);font-weight:500}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px;align-items:center}
+.cta .mono{color:var(--dim)}
+
+.in{animation:in 1s cubic-bezier(.16,1,.3,1) both}
+.in.a{animation-delay:.08s}.in.b{animation-delay:.18s}.in.c{animation-delay:.3s}.in.d{animation-delay:.45s}
+@keyframes in{from{opacity:0;transform:translateY(18px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+
+/* demo */
+section{padding-block:clamp(72px,12vh,120px)}
+.eyebrow{color:var(--now)}
+h2{margin:14px 0 0;font-weight:500;font-size:clamp(34px,5.4vw,60px);line-height:1;letter-spacing:-.045em;text-wrap:balance;max-width:16ch}
+.demo{margin-top:44px;border:1px solid var(--hair);border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)),var(--panel);padding:clamp(18px,4vw,36px);position:relative;overflow:hidden}
+.demo::before{content:"";position:absolute;inset:-1px;border-radius:22px;padding:1px;background:linear-gradient(140deg,rgba(139,139,255,.5),transparent 35%,transparent 70%,rgba(139,139,255,.25));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.row1{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;font-size:14px;color:var(--dim);border:1px solid var(--hair);transition:color .2s,border-color .2s,background .2s}
+.chips button:hover{color:var(--ink)}
+.chips button[aria-pressed="true"]{color:#000;background:var(--ink);border-color:var(--ink)}
+.chips button:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+.due{display:flex;align-items:center;gap:12px;flex:1;min-width:240px;max-width:380px}
+.due span{white-space:nowrap}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:2px;background:var(--ghost);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(139,139,255,.25),0 0 18px var(--now-glow);cursor:grab}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(139,139,255,.25),0 0 18px var(--now-glow);cursor:grab}
+.verdict{margin-top:40px;font-size:clamp(40px,7vw,76px);font-weight:500;letter-spacing:-.05em;line-height:1}
+.verdict em{color:var(--now);text-shadow:0 0 50px var(--now-haze);display:inline-block}
+.vsub{margin-top:12px;color:var(--dim)}
+.strip{margin-top:36px;display:grid;gap:clamp(3px,.8vw,8px);height:190px;align-items:end;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+.day{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:8px;min-width:0}
+.bar{height:130px;border-radius:7px 7px 3px 3px;transform-origin:bottom;will-change:transform;background:var(--ghost)}
+.bar.work{background:linear-gradient(var(--now),rgba(139,139,255,.45));box-shadow:0 0 24px rgba(139,139,255,.25)}
+.bar.spare{background:repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 3px,transparent 3px 7px);outline:1px dashed var(--ghost);outline-offset:-1px}
+.bar.due{background:var(--ink)}
+.amt,.dl{text-align:center;font:11px var(--mono);color:var(--dim);white-space:nowrap;overflow:hidden}
+.amt{height:14px}
+.dl b{display:block;color:var(--ink);font-weight:500}
+@media (max-width:560px){.amt{visibility:hidden}.dl{font-size:9.5px;letter-spacing:0}.strip{height:160px}}
+
+/* three facts */
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,4vw,48px);margin-top:56px}
+.three div{border-top:1px solid var(--hair);padding-top:20px}
+.three h3{margin:0;font-weight:500;font-size:19px;letter-spacing:-.02em}
+.three p{margin:8px 0 0;color:var(--dim);font-size:15px}
+@media (max-width:700px){.three{grid-template-columns:1fr}}
+
+/* shot */
+.stage{perspective:1600px;margin-top:56px}
+.shot{position:relative;border-radius:16px;border:1px solid var(--hair);overflow:hidden;transform-style:preserve-3d;will-change:transform;box-shadow:0 40px 120px -20px rgba(110,110,255,.28),0 0 0 1px rgba(255,255,255,.03)}
+.shot img{display:block;width:100%;height:auto}
+.shot .glare{position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.08),transparent 60%)}
+
+/* end */
+.end{text-align:left}
+.end h2{max-width:none;font-size:clamp(52px,10vw,120px);line-height:.92;letter-spacing:-.055em}
+.end h2 em{color:var(--now);text-shadow:0 0 50px var(--now-haze)}
+.fine{margin-top:28px;color:var(--dim);font-size:14px;max-width:56ch}
+.fine b{color:var(--ink);font-weight:500}
+
+footer .wrap{border-top:1px solid var(--hair);padding-block:28px 48px;display:flex;flex-wrap:wrap;gap:12px 24px;color:var(--dim);font-size:13px}
+footer .r{margin-left:auto;display:flex;gap:20px}
+footer a{text-decoration:none}
+footer a:hover{color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){.in{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="aura" aria-hidden="true"><i id="aura1"></i><i id="aura2"></i></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="spine" aria-hidden="true"><div class="past" id="past"></div><div class="future" id="future"></div><div class="mark" id="mark"><span class="lbl" id="nowlbl">NOW</span></div></div>
+
+<nav><div class="wrap">
+  <a class="brand" href="#top" aria-label="Kairo home">
+    <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#111113" stroke="rgba(255,255,255,.12)"/><rect x="29" y="9" width="6" height="18" fill="#f2f2f2"/><rect x="29" y="27" width="6" height="10" fill="#8b8bff"/><rect x="29" y="37" width="6" height="18" fill="#4a4a4e"/></svg>
+    Kairo
+  </a>
+  <div class="navr">
+    <a class="t" href="#plan">How it works</a>
+    <a class="btn solid sm mag" href="#get">Download</a>
+  </div>
+</div></nav>
+
+<main class="wrap" id="top">
+  <section class="hero" style="padding-top:clamp(56px,12vh,120px)">
+    <div class="kicker mono in"><b></b>FOR MAC · FREE · INVITE BETA</div>
+    <h1 class="in a">Know when<br>to <em>start.</em></h1>
+    <p class="sub in b">Every planner knows when it's due. Kairo works backward from the deadline and <b>tells you which day to begin.</b></p>
+    <div class="cta in c">
+      <a class="btn solid mag" href="#get">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg>
+        Download for Mac
+      </a>
+      <a class="btn ghost mag" href="#plan">Try it</a>
+    </div>
+  </section>
+
+  <section id="plan">
+    <span class="mono eyebrow">TRY IT</span>
+    <h2>Pick an assignment. Move the deadline.</h2>
+    <div class="demo">
+      <div class="row1">
+        <div class="chips" id="kind" role="group" aria-label="Kind of work"></div>
+        <label class="due"><span class="mono" style="color:var(--dim)">DUE IN</span><input type="range" id="dueIn" min="3" max="13" value="9" aria-label="Days until due"><span class="mono" id="dueInV">9 days</span></label>
+      </div>
+      <div class="verdict" id="verdict" aria-live="polite">Start <em>Thursday.</em></div>
+      <p class="vsub mono" id="vsub"></p>
+      <div class="strip" id="strip"></div>
+    </div>
+
+    <div class="three">
+      <div><h3>It knows the work.</h3><p>An essay is about 6 hours, a lab 2. It learns your real pace from what you finish.</p></div>
+      <div><h3>It finds the time.</h3><p>Each day's share lands in a free gap between your classes.</p></div>
+      <div><h3>It sees crunch coming.</h3><p>Heavy weeks show up in red, twelve weeks out.</p></div>
+    </div>
+  </section>
+
+  <section id="look" style="padding-top:0">
+    <div class="stage"><div class="shot" id="shot">
+      <img src="img/today-nightfall.png" alt="Kairo's Today view: one line down the day, finished tasks above the Now mark and what's left below it" width="1440" height="1040">
+      <div class="glare"></div>
+    </div></div>
+  </section>
+
+  <section class="end" id="get">
+    <span class="mono eyebrow">DOWNLOAD</span>
+    <h2>Stop starting<br><em>the night before.</em></h2>
+    <div class="cta">
+      <a class="btn solid mag" href="https://github.com/joshuajyi/daily-organizer/releases/latest" target="_blank" rel="noopener">Download for Mac</a>
+      <span class="mono">APPLE SILICON · MACOS 13+</span>
+    </div>
+    <p class="fine"><b>No account, no cloud.</b> Everything stays on your Mac. Kairo is in an invite beta, so each download needs an access code; message me for one. It isn't notarized yet, so the first time you open it, allow it under System Settings › Privacy &amp; Security.</p>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <span>Kairo · made by Josh Yi</span>
+  <span class="r"><a href="https://github.com/joshuajyi/daily-organizer" target="_blank" rel="noopener">GitHub</a><a href="#top">Top</a></span>
+</div></footer>
+
+<script>
+(() => {
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE = matchMedia('(pointer: fine)').matches;
+
+/* spring solver: semi-implicit Euler, 4 substeps a frame */
+const active = new Set(); let raf = 0, last = 0;
+class Spring {
+  constructor(x, on, o = {}) { this.x = x; this.v = 0; this.t = x; this.k = o.k ?? 300; this.c = o.c ?? 28; this.eps = o.eps ?? .05; this.on = on; on && on(x); }
+  to(t, v) { this.t = t; if (v !== undefined) this.v = v; if (REDUCED) { this.x = t; this.v = 0; this.on && this.on(t); return; } active.add(this); kick(); }
+  set(x) { this.x = this.t = x; this.v = 0; active.delete(this); this.on && this.on(x); }
+}
+function kick() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }
+function tick(now) {
+  const h = Math.min(.034, (now - last) / 1000) / 4; last = now;
+  for (const s of active) {
+    for (let i = 0; i < 4; i++) { s.v += (-s.k * (s.x - s.t) - s.c * s.v) * h; s.x += s.v * h; }
+    if (Math.abs(s.x - s.t) < s.eps && Math.abs(s.v) < s.eps * 10) { s.x = s.t; s.v = 0; active.delete(s); }
+    s.on && s.on(s.x);
+  }
+  raf = active.size ? requestAnimationFrame(tick) : 0;
+}
+
+/* the line: Now rides down it as you scroll, with a little lag */
+const past = document.getElementById('past'), future = document.getElementById('future'), mark = document.getElementById('mark');
+const MH = 56;
+const nowY = new Spring(0, y => {
+  const H = innerHeight; y = Math.max(0, Math.min(H - MH, y));
+  past.style.height = y + 'px'; mark.style.transform = `translateY(${y}px)`;
+  future.style.top = (y + MH) + 'px';
+}, { k: 90, c: 16, eps: .2 });
+const placeNow = () => { const max = document.documentElement.scrollHeight - innerHeight; const p = max > 0 ? scrollY / max : 0; nowY.to(120 + p * (innerHeight - 240)); };
+nowY.set(120); addEventListener('scroll', placeNow, { passive: true }); addEventListener('resize', placeNow);
+const nl = document.getElementById('nowlbl');
+const clk = () => { const d = new Date(); let h = d.getHours(), m = d.getMinutes(); nl.textContent = 'NOW ' + ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? ' AM' : ' PM'); };
+clk(); setInterval(clk, 30000);
+
+/* aura follows the pointer on springs; drifts slowly when idle */
+const a1 = document.getElementById('aura1'), a2 = document.getElementById('aura2');
+const ax = new Spring(innerWidth * .65, null, { k: 18, c: 9, eps: .5 }), ay = new Spring(innerHeight * .2, null, { k: 18, c: 9, eps: .5 });
+const bx = new Spring(innerWidth * .1, null, { k: 8, c: 7, eps: .5 }), by = new Spring(innerHeight * .9, null, { k: 8, c: 7, eps: .5 });
+ax.on = ay.on = () => { const r = Math.max(innerWidth, innerHeight) * .35; a1.style.transform = `translate(${ax.x - r}px,${ay.x - r}px)`; };
+bx.on = by.on = () => { const r = Math.max(innerWidth, innerHeight) * .35; a2.style.transform = `translate(${bx.x - r}px,${by.x - r}px) scale(.8)`; };
+ax.on(); bx.on();
+if (FINE && !REDUCED) addEventListener('pointermove', e => { ax.to(e.clientX); ay.to(e.clientY); bx.to(innerWidth - e.clientX * .6); by.to(innerHeight - e.clientY * .5); }, { passive: true });
+else if (!REDUCED) { let t = 0; setInterval(() => { t += 1; ax.to(innerWidth * (.5 + .3 * Math.sin(t / 3))); ay.to(innerHeight * (.3 + .2 * Math.cos(t / 4))); }, 1800); }
+
+/* magnetic buttons */
+if (FINE && !REDUCED) document.querySelectorAll('.mag').forEach(b => {
+  const x = new Spring(0, null, { k: 260, c: 14, eps: .02 }), y = new Spring(0, null, { k: 260, c: 14, eps: .02 });
+  x.on = y.on = () => b.style.transform = `translate(${x.x}px,${y.x}px)`;
+  b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); x.to((e.clientX - r.left - r.width / 2) * .25); y.to((e.clientY - r.top - r.height / 2) * .35); });
+  b.addEventListener('pointerleave', () => { x.to(0); y.to(0); });
+});
+
+/* screenshot tilts toward the pointer */
+const shot = document.getElementById('shot');
+const rx = new Spring(0, null, { k: 120, c: 14, eps: .01 }), ry = new Spring(0, null, { k: 120, c: 14, eps: .01 });
+rx.on = ry.on = () => shot.style.transform = `rotateX(${rx.x}deg) rotateY(${ry.x}deg)`;
+if (FINE && !REDUCED) {
+  shot.addEventListener('pointermove', e => { const r = shot.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height; ry.to((px - .5) * 8); rx.to((.5 - py) * 6); shot.style.setProperty('--gx', px * 100 + '%'); shot.style.setProperty('--gy', py * 100 + '%'); });
+  shot.addEventListener('pointerleave', () => { rx.to(0); ry.to(0); });
+}
+
+/* the demo: plan backward from the deadline */
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const today = new Date(); today.setHours(0, 0, 0, 0);
+const addDays = n => { const d = new Date(today); d.setDate(d.getDate() + n); return d; };
+const fmt = m => { const h = Math.floor(m / 60), r = m % 60; return (h ? h + 'h' : '') + (h && r ? ' ' : '') + (r ? r + 'm' : ''); };
+const KINDS = [['Essay', 6], ['Midterm', 6], ['Project', 8], ['Final', 10], ['Lab', 2]];
+let kind = 0;
+const kindEl = document.getElementById('kind');
+KINDS.forEach(([n, h], i) => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = `${n} · ${h}h`; b.setAttribute('aria-pressed', i === kind);
+  b.onclick = () => { kind = i; [...kindEl.children].forEach((x, j) => x.setAttribute('aria-pressed', j === i)); plan(); };
+  kindEl.appendChild(b);
+});
+const dueIn = document.getElementById('dueIn'), strip = document.getElementById('strip');
+const cols = [];
+for (let i = 0; i <= 13; i++) {
+  const d = document.createElement('div'); d.className = 'day';
+  d.innerHTML = '<div class="amt"></div><div class="bar"></div><div class="dl"></div>';
+  strip.appendChild(d);
+  const bar = d.children[1];
+  cols.push({ d, bar, amt: d.children[0], dl: d.children[2], h: new Spring(.02, v => bar.style.transform = `scaleY(${Math.max(0, v)})`, { k: 200 + i * 6, c: 16, eps: .002 }) });
+}
+const verdict = document.getElementById('verdict'), vsub = document.getElementById('vsub');
+const vs = new Spring(1, v => { const e = verdict.querySelector('em'); if (e) e.style.transform = `translateY(${(1 - v) * 14}px)`, e.style.opacity = Math.min(1, v); }, { k: 260, c: 20, eps: .002 });
+let lastStart = null;
+function plan() {
+  const n = +dueIn.value, total = KINDS[kind][1] * 60;
+  document.getElementById('dueInV').textContent = n + ' days';
+  const spare = n - 1;                              // one spare day before it's due
+  const need = Math.ceil(total / 90);               // at most about 90 minutes a day
+  const days = Math.min(need, spare);               // days 0..spare-1 can hold work
+  const start = spare - days;
+  const per = Math.round(total / days / 5) * 5;
+  strip.style.gridTemplateColumns = `repeat(${n + 1},minmax(0,1fr))`;
+  cols.forEach((c, i) => {
+    c.d.hidden = i > n; if (i > n) return;
+    const d = addDays(i);
+    c.dl.innerHTML = `<b>${i === 0 ? 'Today' : DAYS[d.getDay()].slice(0, 3)}</b>${d.getDate()}`;
+    let cls = 'bar', hgt = .02, amt = '';
+    if (i === n) { cls = 'bar due'; hgt = .14; amt = 'DUE'; }
+    else if (i >= start && i < start + days) { cls = 'bar work'; hgt = Math.min(1, per / 120); amt = fmt(per); }
+    else if (i === spare) { cls = 'bar spare'; hgt = .3; amt = 'SPARE'; }
+    c.bar.className = cls; c.amt.textContent = amt; c.h.to(hgt);
+  });
+  const sd = addDays(start);
+  const name = start === 0 ? 'today.' : start === 1 ? 'tomorrow.' : DAYS[sd.getDay()] + '.';
+  if (name !== lastStart) { verdict.innerHTML = `Start <em>${name}</em>`; vs.set(0); vs.to(1); lastStart = name; }
+  vsub.textContent = `${fmt(total).toUpperCase()} OF WORK · ${fmt(per).toUpperCase()} A DAY · ${days} DAY${days > 1 ? 'S' : ''}${per > 95 ? ' · TIGHT' : ''}`;
+}
+dueIn.addEventListener('input', plan);
+plan();
+})();
+</script>
+</body>
+</html>
